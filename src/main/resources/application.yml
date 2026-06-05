@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: clothing-erp
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clothing_erp_db
+    username: postgres
+    password: safarova0315
+    driver-class-name: org.postgresql.Driver
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+app:
+  jwt:
+    secret: 9a672713a116b47817b1897e411b0e008b8b09337e2cb2c9f99cf4a7192b0c1634b07fb8381d66822df3b054238e8ec4
+    expiration-ms: 86400000
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO

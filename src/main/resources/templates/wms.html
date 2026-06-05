@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: html-head('WMS Ombor')}"></head>
+<body class="bg-slate-50">
+
+    <!-- Sidebar Layout -->
+    <div th:replace="~{layout :: sidebar('wms')}"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="md:pl-64 flex flex-col min-h-screen">
+        
+        <!-- Top Navbar -->
+        <header th:replace="~{layout :: navbar}"></header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-6 space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 sm:space-y-0">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-warehouse text-brand-500 mr-2"></i> WMS Ombor Tizimi</h1>
+                    <p class="text-slate-500 text-sm mt-1">Zaxiralar nazorati, mahsulot kirim-chiqimlari, omborlar taqsimoti va kam zaxira limitlari.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openModal('addCategoryModal')" class="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all">
+                        <i class="fa-solid fa-tags mr-1"></i> Kategoriya qo'shish
+                    </button>
+                    <button onclick="openModal('addWarehouseModal')" class="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all">
+                        <i class="fa-solid fa-square-plus mr-1"></i> Ombor ochish
+                    </button>
+                    <button onclick="openModal('addProductModal')" class="px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 flex items-center space-x-2 transition-all">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Mahsulot qo'shish</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Buttons navigation -->
+            <div class="flex border-b border-slate-200 space-x-4">
+                <button onclick="switchTab('catalogTab', this)" class="tab-btn px-4 py-2.5 text-sm font-semibold text-brand-500 border-b-2 border-brand-500 transition-all">
+                    <i class="fa-solid fa-shirt mr-1.5"></i> Kiyim-kechak katalogi
+                </button>
+                <button onclick="switchTab('inventoryTab', this)" class="tab-btn px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-all">
+                    <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Omborlardagi qoldiqlar
+                </button>
+                <button onclick="switchTab('lowStockTab', this)" class="tab-btn px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-all flex items-center">
+                    <i class="fa-solid fa-triangle-exclamation mr-1.5 text-rose-500"></i> Kam qolgan zaxiralar
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-rose-50 border border-rose-100 text-[9px] font-bold text-rose-500" th:text="${lowStockItems.size()}">0</span>
+                </button>
+            </div>
+
+            <!-- Tab Content 1: Product Catalog -->
+            <div id="catalogTab" class="tab-content space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800">Tizimdagi tayyor kiyim-kechak SKU kartochkalari</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">SKU Code</th>
+                                    <th class="px-6 py-4">Mahsulot nomi</th>
+                                    <th class="px-6 py-4">Kategoriya</th>
+                                    <th class="px-6 py-4">O'lcham (Size)</th>
+                                    <th class="px-6 py-4">Rang</th>
+                                    <th class="px-6 py-4">Tannarx (Cost)</th>
+                                    <th class="px-6 py-4">Sotish (Price)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="product : ${products}" class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-500" th:text="${product.sku}">SKU-001</td>
+                                    <td class="px-6 py-4 font-semibold text-slate-800" th:text="${product.name}">Turkish Dress</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200" th:text="${product.category.name}">Category</span>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium" th:text="${product.size}">L</td>
+                                    <td class="px-6 py-4" th:text="${product.color}">Red</td>
+                                    <td class="px-6 py-4 font-semibold text-slate-500" th:text="'$' + ${product.cost}">$10.00</td>
+                                    <td class="px-6 py-4 font-bold text-brand-500" th:text="'$' + ${product.price}">$25.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Stock Inventory & Quick Adjust Form -->
+            <div id="inventoryTab" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Inventory List (Col-span 2) -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100">
+                            <h3 class="font-bold text-slate-800">Haqiqiy vaqt rejimidagi qoldiqlar (Stock)</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Ombor</th>
+                                        <th class="px-6 py-4">Mahsulot</th>
+                                        <th class="px-6 py-4">SKU</th>
+                                        <th class="px-6 py-4">Soni</th>
+                                        <th class="px-6 py-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr th:each="inv : ${inventories}" class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-4 font-semibold text-slate-800 flex items-center space-x-2">
+                                            <i class="fa-solid fa-warehouse text-slate-400"></i>
+                                            <span th:text="${inv.warehouse.name}">Warehouse 1</span>
+                                        </td>
+                                        <td class="px-6 py-4 font-semibold text-slate-700" th:text="${inv.product.name}">Turkish Denim</td>
+                                        <td class="px-6 py-4 font-mono text-xs" th:text="${inv.product.sku}">SKU</td>
+                                        <td class="px-6 py-4 font-bold" th:text="${inv.quantity} + ' dona'">120 dona</td>
+                                        <td class="px-6 py-4">
+                                            <span th:if="${inv.quantity > inv.minThreshold}" class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100">Zaxira yetarli</span>
+                                            <span th:if="${inv.quantity <= inv.minThreshold}" class="text-[10px] font-bold bg-rose-50 text-rose-500 px-2 py-0.5 rounded border border-rose-100 animate-pulse">Kam qoldi!</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Stock Adjustment form panel -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-2 flex items-center">
+                                <i class="fa-solid fa-dolly text-brand-500 mr-2"></i>
+                                Kirim / Chiqim Amaliyoti
+                            </h3>
+                            <p class="text-slate-400 text-xs mb-6">Ombordagi kiyim-kechak sonini qo'lda to'g'rilash (masalan: yaroqsiz mahsulotlar hisobdan chiqarilganda).</p>
+                            
+                            <form th:action="@{/wms/stock/adjust}" method="POST" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mahsulot tanlang</label>
+                                    <select name="productId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <option th:each="prod : ${products}" th:value="${prod.id}" th:text="${prod.name} + ' (' + ${prod.sku} + ')'">Product</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Qaysi ombordan?</label>
+                                    <select name="warehouseId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <option th:each="wh : ${warehouses}" th:value="${wh.id}" th:text="${wh.name}">Warehouse</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">O'zgarish miqdori (Delta)</label>
+                                    <input type="number" name="delta" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Masalan: 100 yoki -50">
+                                </div>
+
+                                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm py-3 rounded-xl transition-all shadow-lg shadow-brand-500/10 flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                    <span>Zaxirani yangilash</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: Low stock alerts -->
+            <div id="lowStockTab" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500 text-xl"></i>
+                        <h3 class="font-bold text-slate-800 text-lg">Kam qolgan mahsulotlar ogohlantirish doskasi</h3>
+                    </div>
+                    <p class="text-slate-400 text-xs mb-6">Ushbu mahsulotlarning zaxirasi belgilangan eng kam (min threshold) limitga yetib keldi. Ular bo'yicha shoshilinch xarid (Purchase Order) rejalashtirish tavsiya etiladi.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div th:each="inv : ${lowStockItems}" class="bg-rose-50/40 p-5 rounded-2xl border border-rose-100 flex items-center justify-between">
+                            <div class="space-y-1">
+                                <span class="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 uppercase" th:text="${inv.product.category.name}">Category</span>
+                                <h4 class="text-base font-bold text-slate-800" th:text="${inv.product.name}">Turkish Slim Jeans</h4>
+                                <p class="text-xs text-slate-400 font-mono" th:text="'SKU: ' + ${inv.product.sku} + ' | ' + ${inv.warehouse.name}">SKU</p>
+                            </div>
+                            <div class="text-right space-y-2">
+                                <span class="text-2xl font-black text-rose-600 block" th:text="${inv.quantity}">5</span>
+                                <span class="text-xs font-medium text-slate-500 block" th:text="'Kritik limit: ' + ${inv.minThreshold} + ' ta'">Limit</span>
+                                <a href="/erp" class="inline-block px-3 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 transition-all"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Xarid qilish</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${lowStockItems.isEmpty()}" class="text-center py-12">
+                        <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-3 block"></i>
+                        <h4 class="text-slate-800 font-bold">Zaxirada kam qolgan kiyimlar yo'q</h4>
+                        <p class="text-slate-400 text-xs mt-1">Ombor barcha kiyim turlari bo'yicha to'la zaxiralangan.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-auto">
+            &copy; 2026 Nexus Clothing ERP WMS.
+        </footer>
+    </div>
+
+    <!-- Modals (Add Product, Category, Warehouse) -->
+    <!-- 1. Add Product -->
+    <div id="addProductModal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800"><i class="fa-solid fa-shirt text-brand-500 mr-2"></i> Katalogga Yangi Kiyim Qo'shish</h3>
+                <button onclick="closeModal('addProductModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form th:action="@{/wms/product}" method="POST" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mahsulot nomi</label>
+                        <input type="text" name="name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Classic Polo T-Shirt">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">SKU Code (Kodi)</label>
+                        <input type="text" name="sku" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="MEN-POLO-99">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kategoriya</label>
+                        <select name="categoryId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">O'lcham (Size)</label>
+                        <input type="text" name="size" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="XL, M, 32">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Rang (Color)</label>
+                        <input type="text" name="color" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Blue, Black">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ulgurji Sotish narxi ($)</label>
+                        <input type="number" step="0.01" name="price" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="25.00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Tannarxi (Cost $) - ERP foy uchun</label>
+                        <input type="number" step="0.01" name="cost" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="10.00">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Tavsif (Description)</label>
+                        <textarea name="description" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 h-20" placeholder="Yengil matodan tikilgan shinam yozgi futbolka."></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeModal('addProductModal')" class="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">Bekor qilish</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 transition-all">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Add Category -->
+    <div id="addCategoryModal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800"><i class="fa-solid fa-tag text-brand-500 mr-2"></i> Kategoriya qo'shish</h3>
+                <button onclick="closeModal('addCategoryModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form th:action="@{/wms/category}" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kategoriya nomi</label>
+                    <input type="text" name="name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Masalan: Accessories">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Tavsif</label>
+                    <textarea name="description" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 h-20" placeholder="Kiyim tasmalar, sumkalar va h.k."></textarea>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeModal('addCategoryModal')" class="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">Bekor qilish</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 transition-all">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Add Warehouse -->
+    <div id="addWarehouseModal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800"><i class="fa-solid fa-square-plus text-brand-500 mr-2"></i> Yangi Ombor ochish</h3>
+                <button onclick="closeModal('addWarehouseModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form th:action="@{/wms/warehouse}" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ombor nomi</label>
+                    <input type="text" name="name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Qo'qon taqsimot markazi">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Manzil</label>
+                    <input type="text" name="location" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Qo'qon shahar, Buyuk Ipak Yo'li st.">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ombor sig'imi (max dona)</label>
+                    <input type="number" name="capacity" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="8000">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeModal('addWarehouseModal')" class="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">Bekor qilish</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 transition-all">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Layout JS -->
+    <div th:replace="~{layout :: layout-js}"></div>
+
+    <!-- Tab & Modal Interactivity -->
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function switchTab(tabId, btn) {
+            // Hide all tabs
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            // Show target tab
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Reset buttons styling
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(button => {
+                button.classList.remove('text-brand-500', 'border-brand-500', 'border-b-2');
+                button.classList.add('text-slate-500', 'font-medium');
+            });
+
+            // Highlight active button
+            btn.classList.remove('text-slate-500', 'font-medium');
+            btn.classList.add('text-brand-500', 'border-brand-500', 'border-b-2');
+        }
+    </script>
+
+</body>
+</html>

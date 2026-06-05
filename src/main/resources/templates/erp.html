@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: html-head('ERP Moliyaviy')}"></head>
+<body class="bg-slate-50">
+
+    <!-- Sidebar Layout -->
+    <div th:replace="~{layout :: sidebar('erp')}"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="md:pl-64 flex flex-col min-h-screen">
+        
+        <!-- Top Navbar -->
+        <header th:replace="~{layout :: navbar}"></header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-6 space-y-6">
+            
+            <!-- Page Header with Export Tools -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 md:space-y-0">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-hand-holding-dollar text-brand-500 mr-2"></i> ERP Savdo va Moliya</h1>
+                    <p class="text-slate-500 text-sm mt-1">Ulgurji shartnomalar, xaridlar balansi, yetkazib beruvchilar va moliyaviy hisobotlar eksporti.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs text-slate-400 font-bold uppercase"><i class="fa-solid fa-download mr-1"></i> Hisobotlarni yuklash:</span>
+                    <a href="/api/reports/export/pdf?type=financial" class="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
+                        <span>PDF Format</span>
+                    </a>
+                    <a href="/api/reports/export/excel?type=financial" class="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
+                        <span>Excel Format</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Financial Ledger KPI Dashboard -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 1. Revenue -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-500 flex items-center justify-center text-xl"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Umumiy Daromad</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-0.5" th:text="'$' + ${#numbers.formatDecimal(revenue, 1, 'COMMA', 2, 'POINT')}">$0.00</h3>
+                    </div>
+                </div>
+                
+                <!-- 2. Expenses -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Import Xarajatlari</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-0.5" th:text="'$' + ${#numbers.formatDecimal(expenses, 1, 'COMMA', 2, 'POINT')}">$0.00</h3>
+                    </div>
+                </div>
+
+                <!-- 3. Net Profit -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div th:class="${netProfit >= 0 ? 'w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl' : 'w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-xl'}">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Net Profit (Foyda)</span>
+                        <h3 th:class="${netProfit >= 0 ? 'text-xl font-bold text-emerald-600 mt-0.5' : 'text-xl font-bold text-rose-500 mt-0.5'}" th:text="'$' + ${#numbers.formatDecimal(netProfit, 1, 'COMMA', 2, 'POINT')}">$0.00</h3>
+                    </div>
+                </div>
+
+                <!-- 4. Profit Margin -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl"><i class="fa-solid fa-percent"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Foyda Margini</span>
+                        <h3 class="text-xl font-bold text-slate-800 mt-0.5" th:text="${#numbers.formatDecimal(profitMargin, 1, 2)} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Buttons navigation -->
+            <div class="flex border-b border-slate-200 space-x-4">
+                <button onclick="switchTab('salesTab', this)" class="tab-btn px-4 py-2.5 text-sm font-semibold text-brand-500 border-b-2 border-brand-500 transition-all">
+                    <i class="fa-solid fa-cash-register mr-1.5"></i> Sotuv shartnomalari
+                </button>
+                <button onclick="switchTab('purchasesTab', this)" class="tab-btn px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-all">
+                    <i class="fa-solid fa-truck-ramp-box mr-1.5"></i> Xarid shartnomalari
+                </button>
+                <button onclick="switchTab('suppliersTab', this)" class="tab-btn px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-all">
+                    <i class="fa-solid fa-building-user mr-1.5"></i> Yetkazib beruvchilar (Suppliers)
+                </button>
+                <button onclick="switchTab('newOrderTab', this)" class="tab-btn px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-all">
+                    <i class="fa-solid fa-file-signature mr-1.5 text-brand-500"></i> Yangi shartnoma tuzish
+                </button>
+            </div>
+
+            <!-- Tab 1: Sales Invoices -->
+            <div id="salesTab" class="tab-content space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800">Sotuv tranzaksiyalari tarixi (Customers Sales)</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">Shartnoma kodi</th>
+                                    <th class="px-6 py-4">Xaridor (Mijoz)</th>
+                                    <th class="px-6 py-4">Sana</th>
+                                    <th class="px-6 py-4">Umumiy summa</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="sale : ${sales}" class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-800" th:text="${sale.orderNumber}">ORD-001</td>
+                                    <td class="px-6 py-4 font-bold text-slate-700" th:text="${sale.customer.companyName}">Zara</td>
+                                    <td class="px-6 py-4" th:text="${#temporals.format(sale.orderDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+                                    <td class="px-6 py-4 font-extrabold text-slate-800" th:text="'$' + ${#numbers.formatDecimal(sale.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                    <td class="px-6 py-4">
+                                        <span th:class="${sale.status == 'DELIVERED' ? 'text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100' : 'text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded border border-amber-100'}" th:text="${sale.status}">Status</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Purchase Invoices -->
+            <div id="purchasesTab" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800">Xarid tranzaksiyalari tarixi (Procurement Purchases)</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">Kvitansiya kodi</th>
+                                    <th class="px-6 py-4">Yetkazib beruvchi</th>
+                                    <th class="px-6 py-4">Sana</th>
+                                    <th class="px-6 py-4">Sotib olish summasi</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="purchase : ${purchases}" class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-slate-800" th:text="${purchase.orderNumber}">PUR-001</td>
+                                    <td class="px-6 py-4 font-bold text-slate-700" th:text="${purchase.supplier.companyName}">Supplier 1</td>
+                                    <td class="px-6 py-4" th:text="${#temporals.format(purchase.orderDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+                                    <td class="px-6 py-4 font-extrabold text-orange-600" th:text="'$' + ${#numbers.formatDecimal(purchase.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100" th:text="${purchase.status}">DELIVERED</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Suppliers -->
+            <div id="suppliersTab" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Suppliers table -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100">
+                            <h3 class="font-bold text-slate-800">Tizimga ulangan import yetkazib beruvchilari</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4">Kompaniya</th>
+                                        <th class="px-6 py-4">Mas'ul xodim</th>
+                                        <th class="px-6 py-4">Email</th>
+                                        <th class="px-6 py-4">Telefon</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr th:each="supplier : ${suppliers}" class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-4 font-bold text-slate-800" th:text="${supplier.companyName}">Supplier LLC</td>
+                                        <td class="px-6 py-4" th:text="${supplier.contactName}">Contact</td>
+                                        <td class="px-6 py-4 font-mono text-xs" th:text="${supplier.email}">Email</td>
+                                        <td class="px-6 py-4" th:text="${supplier.phone}">Phone</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Add Supplier panel -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="font-bold text-slate-800 mb-2 flex items-center">
+                            <i class="fa-solid fa-truck-field text-brand-500 mr-2"></i>
+                            Yetkazib beruvchi qo'shish
+                        </h3>
+                        <p class="text-slate-400 text-xs mb-6">Yangi xorijiy yoki mahalliy mato va kiyim yetkazib beruvchilar kartochkasini ro'yxatdan o'tkazish.</p>
+
+                        <form th:action="@{/erp/supplier}" method="POST" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kompaniya nomi</label>
+                                <input type="text" name="companyName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Istanbul Denim Textile">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Vakil ismi (F.I.O)</label>
+                                <input type="text" name="contactName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Mehmet Kaan">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email</label>
+                                <input type="email" name="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="sales@istanbul.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Telefon</label>
+                                <input type="text" name="phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="+90 532 123 4567">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Manzil</label>
+                                <input type="text" name="address" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Merter district, Istanbul, Turkey">
+                            </div>
+
+                            <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm py-3 rounded-xl transition-all shadow-lg shadow-brand-500/10 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                                <span>Yetkazib beruvchini saqlash</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: New Order (CRM/ERP/WMS linkage) -->
+            <div id="newOrderTab" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 max-w-2xl mx-auto">
+                    <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center">
+                        <i class="fa-solid fa-file-contract text-brand-500 mr-2"></i>
+                        Yangi shartnoma / Hujjat rasmiylashtirish
+                    </h3>
+                    <p class="text-slate-400 text-xs mb-8">Sotuv (Mijozga kiyim sotish va ombor zaxirasini kamaytirish) yoki Xarid (Yetkazib beruvchidan kiyim sotib olish va ombor zaxirasini ko'paytirish) amaliyotlarini tizimlashtirish.</p>
+
+                    <form th:action="@{/erp/order}" method="POST" class="space-y-5">
+                        <div class="grid grid-cols-2 gap-6">
+                            
+                            <!-- Order Type -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hujjat turi (Order Type)</label>
+                                <select name="type" id="orderType" onchange="toggleOrderActors()" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-bold">
+                                    <option value="SALE">SOTUV (SALE - stock decrease)</option>
+                                    <option value="PURCHASE">XARID (PURCHASE - stock increase)</option>
+                                </select>
+                            </div>
+
+                            <!-- Document Code -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hujjat/Shartnoma raqami</label>
+                                <input type="text" name="orderNumber" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono" placeholder="ORD-2026-003">
+                            </div>
+
+                            <!-- Customer select block (for Sales) -->
+                            <div id="customerSelectBlock">
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sotiladigan xaridor (CRM Client)</label>
+                                <select name="customerId" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option th:each="cust : ${customers}" th:value="${cust.id}" th:text="${cust.companyName}">Customer</option>
+                                </select>
+                            </div>
+
+                            <!-- Supplier select block (for Purchases - hidden initially) -->
+                            <div id="supplierSelectBlock" class="hidden">
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sotib olinadigan yetkazib beruvchi (Vendor)</label>
+                                <select name="supplierId" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option th:each="supp : ${suppliers}" th:value="${supp.id}" th:text="${supp.companyName}">Supplier</option>
+                                </select>
+                            </div>
+
+                            <!-- Product select -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mahsulot kiyimi (Product Catalog)</label>
+                                <select name="productId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option th:each="prod : ${products}" th:value="${prod.id}" th:text="${prod.name} + ' (' + ${prod.sku} + ')'">Product</option>
+                                </select>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Soni (Quantity)</label>
+                                <input type="number" name="quantity" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="100">
+                            </div>
+
+                            <!-- Price -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Birlik shartnoma narxi ($)</label>
+                                <input type="number" step="0.01" name="price" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="25.00">
+                            </div>
+
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100 flex items-center justify-end">
+                            <button type="submit" class="px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-brand-500/20 flex items-center space-x-2">
+                                <i class="fa-solid fa-file-circle-check"></i>
+                                <span>Hujjatni tasdiqlash va zaxirani yangilash</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-auto">
+            &copy; 2026 Nexus Clothing ERP. Barcha huquqlar himoyalangan.
+        </footer>
+    </div>
+
+    <!-- Layout JS -->
+    <div th:replace="~{layout :: layout-js}"></div>
+
+    <!-- Tab & Modal Logic -->
+    <script>
+        function switchTab(tabId, btn) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(button => {
+                button.classList.remove('text-brand-500', 'border-brand-500', 'border-b-2');
+                button.classList.add('text-slate-500', 'font-medium');
+            });
+
+            btn.classList.remove('text-slate-500', 'font-medium');
+            btn.classList.add('text-brand-500', 'border-brand-500', 'border-b-2');
+        }
+
+        function toggleOrderActors() {
+            const type = document.getElementById('orderType').value;
+            const customerBlock = document.getElementById('customerSelectBlock');
+            const supplierBlock = document.getElementById('supplierSelectBlock');
+
+            if (type === 'SALE') {
+                customerBlock.classList.remove('hidden');
+                supplierBlock.classList.add('hidden');
+            } else {
+                customerBlock.classList.add('hidden');
+                supplierBlock.classList.remove('hidden');
+            }
+        }
+    </script>
+
+</body>
+</html>

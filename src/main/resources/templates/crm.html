@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: html-head('CRM Mijozlar')}"></head>
+<body class="bg-slate-50">
+
+    <!-- Sidebar Layout -->
+    <div th:replace="~{layout :: sidebar('crm')}"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="md:pl-64 flex flex-col min-h-screen">
+        
+        <!-- Top Navbar -->
+        <header th:replace="~{layout :: navbar}"></header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-6 space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 sm:space-y-0">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-users-rectangle text-brand-500 mr-2"></i> CRM Mijozlar Boshqaruvi</h1>
+                    <p class="text-slate-500 text-sm mt-1">Wholesale xaridorlar ro'yxati, kontaktlar, shartnomalar va buyurtmalar tarixi.</p>
+                </div>
+                <button onclick="openModal('addCustomerModal')" class="px-4 py-2.5 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Yangi mijoz qo'shish</span>
+                </button>
+            </div>
+
+            <!-- CRM Quick Info Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-500 flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Mijozlar soni</span>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-0.5" th:text="${customers.size()}">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">Faol mijozlar</span>
+                        <h3 class="text-2xl font-bold text-emerald-600 mt-0.5">100% Active</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl"><i class="fa-solid fa-wallet"></i></div>
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold block uppercase">O'rtacha Savdo aylanmasi</span>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-0.5">$3,916</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRM Main Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Customers Table List (Col-span 2) -->
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="font-bold text-slate-800">Ulgurji Hamkorlar Ro'yxati</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-400">Filtrlash:</span>
+                            <span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer">Hammasi</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-4">Kompaniya nomi</th>
+                                    <th class="px-6 py-4">Kontakt vakil</th>
+                                    <th class="px-6 py-4">Telefon</th>
+                                    <th class="px-6 py-4">Shahar</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+<!--                                <tr th:each="customer : ${customers}" class="hover:bg-slate-50 cursor-pointer transition-colors" th:onclick="'showCustomerDetails(' + ${customer.id} + ', \'' + ${customer.companyName} + '\', \'' + ${customer.contactName} + '\', \'' + ${customer.email} + '\', \'' + ${customer.phone} + '\', \'' + ${customer.address} + '\', \'' + ${customer.city} + '\', \'' + ${customer.country} + '\')'">-->
+<tr th:each="customer : ${customers}"
+    class="hover:bg-slate-50 cursor-pointer transition-colors"
+    th:data-id="${customer.id}"
+    th:data-company="${customer.companyName}"
+    th:data-contact="${customer.contactName}"
+    th:data-email="${customer.email}"
+    th:data-phone="${customer.phone}"
+    th:data-address="${customer.address}"
+    th:data-city="${customer.city}"
+    th:data-country="${customer.country}"
+    onclick="showCustomerDetails(
+        this.dataset.id,
+        this.dataset.company,
+        this.dataset.contact,
+        this.dataset.email,
+        this.dataset.phone,
+        this.dataset.address,
+        this.dataset.city,
+        this.dataset.country
+    )">
+                                    <td class="px-6 py-4 font-bold text-slate-800 flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-500 flex items-center justify-center text-xs">
+                                            <i class="fa-solid fa-building"></i>
+                                        </div>
+                                        <span th:text="${customer.companyName}">Company</span>
+                                    </td>
+                                    <td class="px-6 py-4" th:text="${customer.contactName}">Contact</td>
+                                    <td class="px-6 py-4 font-medium text-slate-700" th:text="${customer.phone}">Phone</td>
+                                    <td class="px-6 py-4" th:text="${customer.city}">City</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-100" th:text="${customer.status}">ACTIVE</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Customer profile info card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col" id="detailsPanel">
+                    <div class="text-center py-8" id="emptyState">
+                        <i class="fa-solid fa-id-card text-5xl text-slate-300 mb-3 block"></i>
+                        <h4 class="text-slate-800 font-bold text-sm">Mijoz tanlanmagan</h4>
+                        <p class="text-slate-400 text-xs mt-1 px-4">Tafsilotlar va buyurtmalar tarixini ko'rish uchun chap tomondagi jadvaldan xaridorni tanlang.</p>
+                    </div>
+
+                    <!-- Populated Details Card (Hidden initially) -->
+                    <div class="hidden space-y-6" id="detailsCard">
+                        <div class="flex items-center space-x-3 border-b border-slate-100 pb-4">
+                            <div class="w-12 h-12 rounded-xl bg-brand-500 text-white flex items-center justify-center text-2xl font-bold" id="detailLogo">
+                                Z
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base" id="detailCompany">Zara Wholesale</h3>
+                                <p class="text-slate-400 text-xs" id="detailContact">Sherzod Alimov</p>
+                            </div>
+                        </div>
+
+                        <!-- Contact details -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Aloqa ma'lumotlari</h4>
+                            
+                            <div class="flex items-center text-sm">
+                                <i class="fa-regular fa-envelope text-slate-400 w-6"></i>
+                                <span class="text-slate-600 font-medium truncate" id="detailEmail">email@example.com</span>
+                            </div>
+                            
+                            <div class="flex items-center text-sm">
+                                <i class="fa-solid fa-phone text-slate-400 w-6"></i>
+                                <span class="text-slate-600 font-semibold" id="detailPhone">+998 90 900 11 22</span>
+                            </div>
+
+                            <div class="flex items-center text-sm">
+                                <i class="fa-solid fa-map-location-dot text-slate-400 w-6"></i>
+                                <span class="text-slate-600 text-xs" id="detailAddress">Tashkent, Uzbekistan</span>
+                            </div>
+                        </div>
+
+                        <!-- Mocked purchase history -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Shartnomalar & Savdo tarixi</h4>
+                            <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl flex justify-between items-center text-sm">
+                                <div>
+                                    <span class="font-bold text-slate-800">ORD-2026-001</span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">25.05.2026</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-bold text-brand-500 block">$7,750.00</span>
+                                    <span class="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Yetkazilgan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-auto">
+            &copy; 2026 Nexus Clothing ERP CRM. Barcha huquqlar himoyalangan.
+        </footer>
+    </div>
+
+    <!-- Modal Form: Add Customer -->
+    <div id="addCustomerModal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800"><i class="fa-solid fa-user-plus text-brand-500 mr-2"></i> Yangi Mijoz qo'shish</h3>
+                <button onclick="closeModal('addCustomerModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form th:action="@{/crm/customer}" method="POST" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kompaniya nomi</label>
+                        <input type="text" name="companyName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Masalan: Zara Wholesale Uzbekistan">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mas'ul xodim (F.I.O)</label>
+                        <input type="text" name="contactName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Sherzod Alimov">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Telefon raqam</label>
+                        <input type="text" name="phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="+998 90 123 45 67">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email manzil</label>
+                        <input type="email" name="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="info@zara.uz">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ko'cha va uy manzili</label>
+                        <input type="text" name="address" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Amir Temur shoh ko'chasi 102-uy">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Shahar</label>
+                        <input type="text" name="city" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Tashkent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Davlat</label>
+                        <input type="text" name="country" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Uzbekistan">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeModal('addCustomerModal')" class="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">Bekor qilish</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-lg shadow-brand-500/10 transition-all">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Layout JS -->
+    <div th:replace="~{layout :: layout-js}"></div>
+
+    <!-- Client Side CRM Panel Interactivity -->
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showCustomerDetails(id, compName, contName, email, phone, addr, city, country) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('detailsCard').classList.remove('hidden');
+
+            document.getElementById('detailLogo').innerText = compName.charAt(0).toUpperCase();
+            document.getElementById('detailCompany').innerText = compName;
+            document.getElementById('detailContact').innerText = contName;
+            document.getElementById('detailEmail').innerText = email;
+            document.getElementById('detailPhone').innerText = phone;
+            document.getElementById('detailAddress').innerText = addr + ", " + city + ", " + country;
+        }
+    </script>
+
+</body>
+</html>

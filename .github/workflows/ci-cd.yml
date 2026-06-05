@@ -1,0 +1,40 @@
+name: Java Spring Boot CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build and Run Unit Tests
+      run: mvn -B clean test
+
+    - name: Package Application JAR
+      run: mvn -B package -DskipTests
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Verify Docker Container Build
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: false
+        tags: clothing-erp:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: erp-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: clothing_erp_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clothing_erp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: clothing-erp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp-spring-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=clothing_erp_db
+      - DB_USER=postgres
+      - DB_PASS=password
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: html-head('AWS Arxitektura')}"></head>
+<body class="bg-slate-50">
+
+    <!-- Sidebar Layout -->
+    <div th:replace="~{layout :: sidebar('cloud')}"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="md:pl-64 flex flex-col min-h-screen">
+        
+        <!-- Top Navbar -->
+        <header th:replace="~{layout :: navbar}"></header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-6 space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800"><i class="fa-solid fa-cloud-arrow-up text-sky-500 mr-2"></i> AWS Bulutli Arxitektura Diagrammasi</h1>
+                    <p class="text-slate-500 text-sm mt-1">Platformaning High-Availability, Auto-Scaling va Multi-AZ xavfsiz infratuzilma topologiyasi.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 mr-2 animate-ping"></span>
+                    <span class="text-xs font-bold text-slate-600">AWS CloudFormation holati: Sinxronlangan</span>
+                </div>
+            </div>
+
+            <!-- AWS Topology and Details Board -->
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                
+                <!-- Interactive SVG Canvas (Col-span 3) -->
+                <div class="xl:col-span-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between border-b border-slate-100 pb-3 mb-6">
+                        <span class="text-sm font-bold text-slate-800"><i class="fa-solid fa-network-wired text-slate-400 mr-2"></i> AWS VPC (10.0.0.0/16) - Interactive Vector Diagram</span>
+                        <span class="text-xs text-slate-400">Komponent ustiga sichqonchani olib keling (Hover)</span>
+                    </div>
+
+                    <!-- SVG Vector Diagram representing AWS Cloud Architecture -->
+                    <div class="w-full max-w-4xl relative overflow-x-auto">
+                        <svg viewBox="0 0 900 620" class="w-full h-auto min-w-[750px]" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Definitions for styling grids -->
+                            <defs>
+                                <linearGradient id="gradVpc" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradSubnetPub" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#eff6ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#dbeafe;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="gradSubnetPriv" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#fdf4ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#fae8ff;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+
+                            <!-- 1. Route 53 DNS & Cloud Storage (Outside VPC) -->
+                            <!-- Route 53 -->
+                            <g class="cursor-pointer" id="node-route53" onclick="selectComponent('route53')">
+                                <rect x="30" y="20" width="80" height="50" rx="6" fill="#ec4899" opacity="0.9" />
+                                <text x="70" y="45" font-family="Outfit" font-size="11" fill="white" font-weight="bold" text-anchor="middle">Route 53</text>
+                                <text x="70" y="60" font-family="Outfit" font-size="8" fill="#fbcfe8" text-anchor="middle">DNS / SSL</text>
+                            </g>
+
+                            <!-- Cloud Storage S3 -->
+                            <g class="cursor-pointer" id="node-s3" onclick="selectComponent('s3')">
+                                <rect x="790" y="20" width="80" height="50" rx="6" fill="#10b981" opacity="0.9" />
+                                <text x="830" y="45" font-family="Outfit" font-size="11" fill="white" font-weight="bold" text-anchor="middle">S3 Bucket</text>
+                                <text x="830" y="60" font-family="Outfit" font-size="8" fill="#a7f3d0" text-anchor="middle">Static Content</text>
+                            </g>
+
+                            <!-- Internet Gateway (IGW) -->
+                            <g class="cursor-pointer" id="node-igw" onclick="selectComponent('igw')">
+                                <rect x="410" y="20" width="100" height="50" rx="6" fill="#0284c7" />
+                                <text x="460" y="45" font-family="Outfit" font-size="11" fill="white" font-weight="bold" text-anchor="middle">Internet GW</text>
+                                <text x="460" y="60" font-family="Outfit" font-size="8" fill="#e0f2fe" text-anchor="middle">Gateway</text>
+                            </g>
+
+                            <!-- Connective arrows from DNS to IGW -->
+                            <line x1="110" y1="45" x2="410" y2="45" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" />
+                            
+                            <!-- 2. VPC Container -->
+                            <rect x="30" y="100" width="840" height="500" rx="16" fill="url(#gradVpc)" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                            <text x="50" y="125" font-family="Outfit" font-size="13" fill="#64748b" font-weight="bold">AWS VPC (10.0.0.0/16)</text>
+
+                            <!-- Route Tables configuration (Virtual inside VPC) -->
+                            <g class="cursor-pointer" id="node-rt" onclick="selectComponent('rt')">
+                                <rect x="740" y="115" width="110" height="35" rx="6" fill="#64748b" />
+                                <text x="795" y="130" font-family="Outfit" font-size="10" fill="white" font-weight="bold" text-anchor="middle">Route Tables</text>
+                                <text x="795" y="142" font-family="Outfit" font-size="7" fill="#cbd5e1" text-anchor="middle">Network Rules</text>
+                            </g>
+
+                            <!-- Availability Zone A Box -->
+                            <rect x="50" y="160" width="380" height="420" rx="12" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,2" />
+                            <text x="65" y="180" font-family="Outfit" font-size="10" fill="#94a3b8" font-weight="semibold">Availability Zone A (us-east-1a)</text>
+
+                            <!-- Availability Zone B Box -->
+                            <rect x="470" y="160" width="380" height="420" rx="12" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,2" />
+                            <text x="485" y="180" font-family="Outfit" font-size="10" fill="#94a3b8" font-weight="semibold">Availability Zone B (us-east-1b)</text>
+
+                            <!-- 3. PUBLIC SUBNETS (10.0.1.0/24 & 10.0.2.0/24) -->
+                            <!-- Pub AZ A -->
+                            <rect x="65" y="200" width="350" height="110" rx="10" fill="url(#gradSubnetPub)" stroke="#93c5fd" stroke-width="1.5" />
+                            <text x="80" y="218" font-family="Outfit" font-size="10" fill="#1e3a8a" font-weight="bold">Public Subnet A (10.0.1.0/24)</text>
+
+                            <!-- Pub AZ B -->
+                            <rect x="485" y="200" width="350" height="110" rx="10" fill="url(#gradSubnetPub)" stroke="#93c5fd" stroke-width="1.5" />
+                            <text x="500" y="218" font-family="Outfit" font-size="10" fill="#1e3a8a" font-weight="bold">Public Subnet B (10.0.2.0/24)</text>
+
+                            <!-- Load Balancer (ELB) linking AZ A and AZ B -->
+                            <g class="cursor-pointer" id="node-elb" onclick="selectComponent('elb')">
+                                <rect x="390" y="225" width="120" height="40" rx="8" fill="#3b82f6" shadow="2" />
+                                <text x="450" y="243" font-family="Outfit" font-size="10" fill="white" font-weight="bold" text-anchor="middle">Application Load Balancer</text>
+                                <text x="450" y="254" font-family="Outfit" font-size="7" fill="#bfdbfe" text-anchor="middle">ALB (HTTP/HTTPS)</text>
+                            </g>
+
+                            <!-- NAT Gateway AZ A -->
+                            <g class="cursor-pointer" id="node-nat" onclick="selectComponent('nat')">
+                                <rect x="80" y="235" width="110" height="40" rx="6" fill="#f59e0b" />
+                                <text x="135" y="252" font-family="Outfit" font-size="9" fill="white" font-weight="bold" text-anchor="middle">NAT Gateway A</text>
+                                <text x="135" y="263" font-family="Outfit" font-size="7" fill="#fef3c7" text-anchor="middle">Static IP Outgoing</text>
+                            </g>
+
+                            <!-- NAT Gateway AZ B -->
+                            <rect x="710" y="235" width="110" height="40" rx="6" fill="#f59e0b" />
+                            <text x="765" y="252" font-family="Outfit" font-size="9" fill="white" font-weight="bold" text-anchor="middle">NAT Gateway B</text>
+                            <text x="765" y="263" font-family="Outfit" font-size="7" fill="#fef3c7" text-anchor="middle">Static IP Outgoing</text>
+
+                            <!-- Connecting line from IGW to Load Balancer -->
+                            <line x1="460" y1="70" x2="460" y2="225" stroke="#3b82f6" stroke-width="2.5" />
+
+                            <!-- 4. PRIVATE SUBNETS (10.0.3.0/24 & 10.0.4.0/24) -->
+                            <!-- Priv AZ A -->
+                            <rect x="65" y="325" width="350" height="150" rx="10" fill="url(#gradSubnetPriv)" stroke="#f0abfc" stroke-width="1.5" />
+                            <text x="80" y="343" font-family="Outfit" font-size="10" fill="#701a75" font-weight="bold">Private Subnet A (10.0.3.0/24)</text>
+
+                            <!-- Priv AZ B -->
+                            <rect x="485" y="325" width="350" height="150" rx="10" fill="url(#gradSubnetPriv)" stroke="#f0abfc" stroke-width="1.5" />
+                            <text x="500" y="343" font-family="Outfit" font-size="10" fill="#701a75" font-weight="bold">Private Subnet B (10.0.4.0/24)</text>
+
+                            <!-- Security Groups boundaries wrapper -->
+                            <!-- AZ A Auto Scaling group -->
+                            <rect x="80" y="355" width="320" height="105" rx="8" fill="none" stroke="#d946ef" stroke-width="1" stroke-dasharray="3,3" />
+                            <text x="90" y="370" font-family="Outfit" font-size="8" fill="#d946ef" font-weight="bold">Auto Scaling Group A</text>
+
+                            <!-- AZ B Auto Scaling group -->
+                            <rect x="500" y="355" width="320" height="105" rx="8" fill="none" stroke="#d946ef" stroke-width="1" stroke-dasharray="3,3" />
+                            <text x="510" y="370" font-family="Outfit" font-size="8" fill="#d946ef" font-weight="bold">Auto Scaling Group B</text>
+
+                            <!-- Servers inside AZ A -->
+                            <!-- ERP Server AZ A -->
+                            <g class="cursor-pointer" id="node-erp" onclick="selectComponent('erp')">
+                                <rect x="95" y="385" width="80" height="60" rx="6" fill="#1e293b" />
+                                <text x="135" y="405" font-family="Outfit" font-size="9" fill="white" font-weight="bold" text-anchor="middle">ERP Server</text>
+                                <text x="135" y="418" font-family="Outfit" font-size="7" fill="#cbd5e1" text-anchor="middle">Spring Boot App</text>
+                                <text x="135" y="430" font-family="Outfit" font-size="6" fill="#10b981" font-weight="bold" text-anchor="middle">EC2 | 10.0.3.50</text>
+                            </g>
+
+                            <!-- CRM Server AZ A -->
+                            <g class="cursor-pointer" id="node-crm" onclick="selectComponent('crm')">
+                                <rect x="185" y="385" width="100" height="60" rx="6" fill="#1e293b" />
+                                <text x="235" y="405" font-family="Outfit" font-size="9" fill="white" font-weight="bold" text-anchor="middle">CRM & Sales Server</text>
+                                <text x="235" y="418" font-family="Outfit" font-size="7" fill="#cbd5e1" text-anchor="middle">REST endpoints</text>
+                                <text x="235" y="430" font-family="Outfit" font-size="6" fill="#10b981" font-weight="bold" text-anchor="middle">EC2 | 10.0.3.51</text>
+                            </g>
+
+                            <!-- WMS Server AZ A -->
+                            <g class="cursor-pointer" id="node-wms" onclick="selectComponent('wms')">
+                                <rect x="295" y="385" width="90" height="60" rx="6" fill="#1e293b" />
+                                <text x="340" y="405" font-family="Outfit" font-size="9" fill="white" font-weight="bold" text-anchor="middle">WMS Core Server</text>
+                                <text x="340" y="418" font-family="Outfit" font-size="7" fill="#cbd5e1" text-anchor="middle">Stock management</text>
+                                <text x="340" y="430" font-family="Outfit" font-size="6" fill="#10b981" font-weight="bold" text-anchor="middle">EC2 | 10.0.3.52</text>
+                            </g>
+
+                            <!-- Repicated Servers inside AZ B (High Availability) -->
+                            <g class="cursor-pointer" id="node-ha" onclick="selectComponent('ha')">
+                                <rect x="515" y="385" width="290" height="60" rx="6" fill="#334155" />
+                                <text x="660" y="410" font-family="Outfit" font-size="10" fill="#e2e8f0" font-weight="bold" text-anchor="middle">Multi-AZ Standby EC2 Instances</text>
+                                <text x="660" y="425" font-family="Outfit" font-size="7" fill="#94a3b8" text-anchor="middle">Active replication - AZ-B Failover nodes</text>
+                            </g>
+
+                            <!-- Connective routing Load Balancer -> Private Subnets -->
+                            <path d="M 450,265 L 450,300 L 240,300 L 240,325" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,3" />
+                            <path d="M 450,300 L 660,300 L 660,325" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,3" />
+
+                            <!-- 5. DATABASE SUBNETS (PostgreSQL RDS) -->
+                            <!-- Primary RDS PostgreSQL (AZ A) -->
+                            <g class="cursor-pointer" id="node-db" onclick="selectComponent('db')">
+                                <rect x="150" y="495" width="180" height="65" rx="10" fill="#2563eb" />
+                                <text x="240" y="518" font-family="Outfit" font-size="10" fill="white" font-weight="bold" text-anchor="middle">RDS PostgreSQL (Primary)</text>
+                                <text x="240" y="530" font-family="Outfit" font-size="8" fill="#93c5fd" text-anchor="middle">Master DB Node | Port 5432</text>
+                                <text x="240" y="542" font-family="Outfit" font-size="7" fill="#10b981" font-weight="bold" text-anchor="middle">Write / Read | 10.0.5.10</text>
+                            </g>
+
+                            <!-- Standby RDS PostgreSQL (AZ B - Multi AZ replication) -->
+                            <g class="cursor-pointer" id="node-dbstandby" onclick="selectComponent('db')">
+                                <rect x="570" y="495" width="180" height="65" rx="10" fill="#475569" />
+                                <text x="660" y="518" font-family="Outfit" font-size="10" fill="#e2e8f0" font-weight="bold" text-anchor="middle">RDS PostgreSQL (Standby)</text>
+                                <text x="660" y="530" font-family="Outfit" font-size="8" fill="#cbd5e1" text-anchor="middle">Secondary Backup Node</text>
+                                <text x="660" y="542" font-family="Outfit" font-size="7" fill="#cbd5e1" text-anchor="middle">Replication Standby | 10.0.6.10</text>
+                            </g>
+
+                            <!-- Sync replication line Master <-> Standby -->
+                            <line x1="330" y1="527" x2="570" y2="527" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,4" />
+                            <text x="450" y="520" font-family="Outfit" font-size="8" fill="#2563eb" font-weight="bold" text-anchor="middle">Synchronous Replication</text>
+
+                            <!-- Lines from Servers to DB -->
+                            <line x1="240" y1="445" x2="240" y2="495" stroke="#94a3b8" stroke-width="1.5" />
+
+                            <!-- 6. VPN Gateway & Corporate VPN Network -->
+                            <g class="cursor-pointer" id="node-vpn" onclick="selectComponent('vpn')">
+                                <rect x="30" y="520" width="80" height="60" rx="6" fill="#8b5cf6" />
+                                <text x="70" y="545" font-family="Outfit" font-size="10" fill="white" font-weight="bold" text-anchor="middle">VPN Gateway</text>
+                                <text x="70" y="560" font-family="Outfit" font-size="7" fill="#ddd6fe" text-anchor="middle">Virtual Gateway</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- AWS Component Inspector panel (Col-span 1) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between" id="inspectorCard">
+                    <div>
+                        <div class="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-4">
+                            <i class="fa-solid fa-circle-info text-sky-500 text-lg"></i>
+                            <h3 class="font-bold text-slate-800">Komponent inspektori</h3>
+                        </div>
+
+                        <!-- Content shown when no node is selected -->
+                        <div id="inspEmpty" class="text-center py-12">
+                            <i class="fa-solid fa-circle-nodes text-5xl text-slate-200 mb-4 block"></i>
+                            <h4 class="font-bold text-slate-700 text-sm">Tafsilotlar yo'q</h4>
+                            <p class="text-slate-400 text-xs mt-2">Diagrammadagi istalgan AWS komponenti ustiga bosing (Click/Hover) va uning sozlamalari, port qoidalari hamda xizmat ko'rsatish doirasini tekshiring.</p>
+                        </div>
+
+                        <!-- Content dynamically loaded on click -->
+                        <div id="inspData" class="hidden space-y-5">
+                            <div>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase border" id="inspCategory">AWS Service</span>
+                                <h3 class="font-bold text-slate-800 text-lg mt-2" id="inspTitle">Amazon Virtual Private Cloud</h3>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Infratuzilma roli</span>
+                                <p class="text-sm text-slate-600 font-medium" id="inspRole">Role details go here...</p>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Texnik ko'rsatkichlari (Specs)</span>
+                                <div class="bg-slate-50 border border-slate-100 p-3.5 rounded-xl font-mono text-xs text-slate-600 space-y-1" id="inspSpecs">
+                                    Specs data...
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Xavfsizlik guruhi (Security Group)</span>
+                                <div class="bg-indigo-50/50 border border-indigo-100 p-3 rounded-xl text-xs text-slate-600 space-y-1.5" id="inspSecurity">
+                                    Security groups data...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Conceptual Cloud Ops Architecture Details -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center">
+                        <i class="fa-solid fa-shield-halved text-emerald-500 mr-2"></i> High Availability & Multi-AZ
+                    </h3>
+                    <p class="text-slate-500 text-xs leading-relaxed">Tizim AWSning Multi-AZ (Multiple Availability Zones) tamoyili asosida loyihalashtirilgan. Agar us-east-1a zonasi (AZ-A) biron-bir tabiiy yoki texnik sabab bilan ishdan chiqsa, Application Load Balancer va Route 53 DNS avtomatik ravishda trafikni us-east-1b zonasidagi (AZ-B) zaxira serverlarga yo'naltiradi. PostgreSQL ma'lumotlar bazasi ham synchronous replication orqali AZ-B dagi Secondary node-ga avtomatik ravishda failover qiladi (ishga tushadi).</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center">
+                        <i class="fa-solid fa-arrow-up-right-dots text-blue-500 mr-2"></i> Auto-Scaling & Load Balancing
+                    </h3>
+                    <p class="text-slate-500 text-xs leading-relaxed">Auto Scaling Group (ASG) ERP, CRM va WMS serverlarining yuklamasini (CPU va Memory) doimiy kuzatib boradi. Agar yuklama 70% dan oshsa, ASG avtomatik ravishda yangi EC2 virtual serverlarini yaratadi (Scale-Out). Yuklama kamayganda esa zaxira serverlarni o'chiradi (Scale-In), bu esa cloud xarajatlarini kamaytiradi. Application Load Balancer trafikni ushbu faol serverlar orasida teng taqsimlaydi (Load Balancing).</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-2 flex items-center">
+                        <i class="fa-solid fa-key text-violet-500 mr-2"></i> Izolyatsiya va Tarmoq Xavfsizligi
+                    </h3>
+                    <p class="text-slate-500 text-xs leading-relaxed">Ma'lumotlar bazasi va ERP, CRM, WMS dasturiy serverlari faqat Private Subnetda joylashgan va tashqi internetdan butunlay uzilgan. Ular faqat NAT Gateway orqali tashqariga (masalan, uchinchi tomon API-lariga) chiquvchi so'rovlar yubora oladi. Tashqi xaridorlar tizimga faqat ALB (HTTP/HTTPS port 80/443) orqali va xavfsizlik devorlari (Security Groups) nazorati ostida kirishlari mumkin.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 mt-auto">
+            &copy; 2026 Nexus Cloud Infrastructure. AWS Partner Architect.
+        </footer>
+    </div>
+
+    <!-- Layout JS -->
+    <div th:replace="~{layout :: layout-js}"></div>
+
+    <!-- Inspector panel interactivity JavaScript data dictionary -->
+    <script>
+        const componentsData = {
+            route53: {
+                category: "Network / DNS",
+                title: "Amazon Route 53 (DNS Service)",
+                role: "Ulgurji savdo platformasining kiruvchi so'rovlarini to'g'ri IP manzilga yo'naltirish. SSL/TLS sertifikatlarini boshqarish.",
+                specs: "• Failover Routing\n• Latency-based Routing\n• HTTPS SSL port 443 termination",
+                security: "AWS Shield Standard - DDoS hujumlaridan himoyalangan.",
+                color: "bg-pink-100 text-pink-700 border-pink-200"
+            },
+            s3: {
+                category: "Storage",
+                title: "Amazon S3 (Cloud Storage)",
+                role: "Kiyim-kechaklarning rasmlari, PDF/Excel hisobotlari va logotip kabi statik fayllarni xavfsiz saqlash.",
+                specs: "• 99.999999999% chidamlilik (Durability)\n• AWS KMS shifrlash (Server-side encryption)",
+                security: "IAM Policies - faqat ERP serverlari uchun maxsus VPC Endpoint orqali kirish ruxsati berilgan.",
+                color: "bg-emerald-100 text-emerald-700 border-emerald-200"
+            },
+            igw: {
+                category: "Network / Gateway",
+                title: "Amazon Internet Gateway (IGW)",
+                role: "VPC tarmoq ichidagi public subnetlarga internetdan kirish va chiqish eshigi vazifasini o'taydi.",
+                specs: "• 10 Gbps+ tarmoqli kenglik\n• Avtomatik AWS boshqaruvi",
+                security: "Faqat ALB joylashgan public subnetlar uchun marshrutlar ochilgan (Route Tables orqali).",
+                color: "bg-sky-100 text-sky-700 border-sky-200"
+            },
+            rt: {
+                category: "Network / Routing",
+                title: "Amazon VPC Route Tables",
+                role: "Tarmoq ichidagi IP paketlarning qaysi marshrut bo'yicha ketishini belgilaydi (Internet Gateway, NAT Gateway yoki local).",
+                specs: "• Local routing: 10.0.0.0/16\n• Public subnet routing: 0.0.0.0/0 -> IGW\n• Private subnet routing: 0.0.0.0/0 -> NAT Gateway",
+                security: "Tashqi kirish taqiqlangan. Faqat tarmoq ma'muri o'zgartira oladi.",
+                color: "bg-slate-100 text-slate-700 border-slate-200"
+            },
+            elb: {
+                category: "Network / Load Balancer",
+                title: "Application Load Balancer (ALB)",
+                role: "Internetdan kelayotgan foydalanuvchilarning so'rovlarini qabul qilib, yuklamani auto-scaling guruhidagi faol serverlar orasida taqsimlaydi.",
+                specs: "• HTTP/HTTPS (Port 80/443)\n• AWS ACM SSL sertifikati ulangan\n• Health Check orqali faqat sog'lom serverlarga yo'naltirish",
+                security: "Inbound: Internetdan 80/443 ochiq.\nOutbound: Private subnet serverlarining 8080 portiga yo'naltirilgan.",
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            nat: {
+                category: "Network / Gateway",
+                title: "NAT Gateway (Network Address Translation)",
+                role: "Private subnetdagi serverlarga internetdan tashqi hujum bo'lmasligi, lekin u yerdagi serverlar internetdan ma'lumot yuklab olishi uchun chiquvchi yo'l ochadi.",
+                specs: "• Elastic IP (EIP) ulangan\n• Bir tomonlama chiquvchi trafik",
+                security: "Tashqaridan keluvchi barcha so'rovlar bloklangan. Faqat ichkaridan boshlangan so'rovlarni o'tkazadi.",
+                color: "bg-amber-100 text-amber-700 border-amber-200"
+            },
+            erp: {
+                category: "Compute / EC2 Instance",
+                title: "ERP Business Logic Server (Spring Boot)",
+                role: "Savdo, xaridlar, buxgalteriya va hisobotlar biznes qoidalarini bajaradigan Spring Boot asosidagi asosiy ilova serveri.",
+                specs: "• Instance Type: m6i.large (2 vCPU, 8 GB RAM)\n• OS: Amazon Linux 2023\n• Port: 8080",
+                security: "Security Group rules:\n- Inbound: Faqat ALB IP-laridan port 8080 ruxsat etilgan.\n- Outbound: DB (5432) va S3 ga ruxsat etilgan.",
+                color: "bg-slate-900 text-white border-slate-800"
+            },
+            crm: {
+                category: "Compute / EC2 Instance",
+                title: "CRM & Customer Server (Spring Boot)",
+                role: "Mijozlar kontaktlari, shartnomalari, buyurtmalar tarixi va sotuv analitikasi uchun REST API xizmatlarini ko'rsatadi.",
+                specs: "• Instance Type: t3.medium (2 vCPU, 4 GB RAM)\n• Port: 8080",
+                security: "Security Group rules:\n- Inbound: Faqat ALB dan port 8080 ochiq.\n- Outbound: PostgreSQL bazaga (5432) ochiq.",
+                color: "bg-slate-900 text-white border-slate-800"
+            },
+            wms: {
+                category: "Compute / EC2 Instance",
+                title: "WMS Inventory & Warehouse Server",
+                role: "Zaxiralar kirim-chiqimi, ombor qoldiqlari va kam qolgan kiyim-kechaklar haqidagi ogohlantirishlarni qayta ishlaydi.",
+                specs: "• Instance Type: t3.medium (2 vCPU, 4 GB RAM)\n• Port: 8080",
+                security: "Security Group rules:\n- Inbound: Faqat ALB dan port 8080 ochiq.\n- Outbound: DB (5432) ga ochiq.",
+                color: "bg-slate-900 text-white border-slate-800"
+            },
+            ha: {
+                category: "Compute / High Availability",
+                title: "Multi-AZ Auto Scaling EC2 Instances (AZ-B)",
+                role: "Availability Zone B dagi zaxira serverlar to'plami. Ular AZ-A dagi asosiy serverlar bilan sinxron holatda turadi va yuklama oshganda yoki avariya yuz berganda avtomatik ishga tushadi.",
+                specs: "• t3.medium va m6i.large zaxiralar\n• Auto Scaling orqali avtomatik ishga tushish",
+                security: "AZ-A dagi serverlar bilan bir xil xavfsizlik qoidalariga (Security Groups) ega.",
+                color: "bg-slate-700 text-white border-slate-600"
+            },
+            db: {
+                category: "Database / Relational RDS",
+                title: "Amazon RDS PostgreSQL (Multi-AZ Master)",
+                role: "Barcha foydalanuvchilar, kiyimlar, ombor, tranzaksiyalar va CRM mijozlari ma'lumotlarini markazlashgan holda saqlash.",
+                specs: "• Engine: PostgreSQL 16.2\n• Instance: db.m6g.xlarge\n• Storage: 200 GB SSD gp3\n• Port: 5432",
+                security: "Security Group rules:\n- Inbound: Faqat ERP/CRM/WMS serverlarining IP manzilidan (10.0.3.0/24 va 10.0.4.0/24) port 5432 ochiq. Tashqi dunyodan butunlay yopiq.",
+                color: "bg-blue-100 text-blue-800 border-blue-200"
+            },
+            vpn: {
+                category: "Network / Security Gateway",
+                title: "AWS Virtual Private Gateway (VPN Gateway)",
+                role: "Kompaniyaning bosh ofisi yoki jismoniy kiyim-kechak omborlaridagi mahalliy tarmoqlar (On-Premises) bilan VPC o'rtasida xavfsiz IPSec VPN tunnelini o'rnatish.",
+                specs: "• IPsec VPN Tunnel\n• 1.25 Gbps tarmoq tezligi",
+                security: "AES-256 shifrlangan ma'lumotlar almashinuvi.",
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            }
+        };
+
+        function selectComponent(key) {
+            const data = componentsData[key];
+            if (!data) return;
+
+            document.getElementById('inspEmpty').classList.add('hidden');
+            document.getElementById('inspData').classList.remove('hidden');
+
+            const categoryEl = document.getElementById('inspCategory');
+            categoryEl.innerText = data.category;
+            categoryEl.className = `text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${data.color}`;
+
+            document.getElementById('inspTitle').innerText = data.title;
+            document.getElementById('inspRole').innerText = data.role;
+            
+            // Format specifications
+            const specsEl = document.getElementById('inspSpecs');
+            specsEl.innerHTML = data.specs.replace(/\n/g, '<br>');
+            
+            // Format security
+            const securityEl = document.getElementById('inspSecurity');
+            securityEl.innerHTML = data.security.replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>
