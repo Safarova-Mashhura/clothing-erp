@@ -23,14 +23,14 @@ jobs:
       - name: Build Docker image
         run: |
           cd /home/ec2-user/clothing-erp
-          docker build -t clothing-erp .
+          sudo docker build -t clothing-erp .
 
       - name: Restart Spring Boot container
         run: |
-          docker stop erp-spring-app || true
-          docker rm erp-spring-app || true
-          docker run -d --name erp-spring-app --network erp-network -p 8080:8080 clothing-erp:latest
+          sudo docker stop erp-spring-app || true
+          sudo docker rm erp-spring-app || true
+          sudo docker run -d --name erp-spring-app --network erp-network -p 8080:8080 clothing-erp:latest
 
       - name: Check running containers
         run: |
-          docker ps
+          sudo docker ps
