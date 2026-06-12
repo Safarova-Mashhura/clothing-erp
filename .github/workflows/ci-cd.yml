@@ -13,26 +13,10 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@v4
 
-      - name: Copy latest code
+      - name: Deploy with Docker Compose
         run: |
           rsync -av --delete --exclude '.git' ./ /home/ec2-user/clothing-erp/
-
-      - name: Build Docker image
-        run: |
           cd /home/ec2-user/clothing-erp
-          sudo docker build -t clothing-erp .
-
-      - name: Ensure PostgreSQL is running
-        run: |
-          sudo docker start erp-postgres-db || true
-          sudo docker update --restart unless-stopped erp-postgres-db || true
-
-      - name: Restart Spring Boot container
-        run: |
-          sudo docker stop erp-spring-app || true
-          sudo docker rm erp-spring-app || true
-          sudo docker run -d --name erp-spring-app --restart unless-stopped --network erp-network -p 8080:8080 clothing-erp:latest
-
-      - name: Check containers
-        run: |
-          sudo docker ps
+          docker-compose down
+          docker-compose up -d --build
+          docker ps
