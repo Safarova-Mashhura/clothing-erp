@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://erp-postgres-db:5432/clothing_erp_db
     username: postgres
-    password: safarova0315
+    password: password
     driver-class-name: org.postgresql.Driver
 
   mvc:
