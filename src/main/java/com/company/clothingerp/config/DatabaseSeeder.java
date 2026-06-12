@@ -194,8 +194,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build());
 
         Warehouse warehouse2 = warehouseRepository.save(Warehouse.builder()
-                .name("Samarkand Logistics Hub (W2)")
-                .location("Samarkand Ring Road")
+                .name("Jizzax Logistics Hub (W2)")
+                .location("Jizzax Ring Road")
                 .capacity(5000)
                 .build());
 
@@ -209,7 +209,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         // Seed product 3
         inventoryRepository.save(Inventory.builder().product(product3).warehouse(warehouse1).quantity(200).minThreshold(25).build());
-        inventoryRepository.save(Inventory.builder().product(product3).warehouse(warehouse2).quantity(6).minThreshold(15).build());  // Low stock in Samarkand!
+        inventoryRepository.save(Inventory.builder().product(product3).warehouse(warehouse2).quantity(6).minThreshold(15).build());  // Low stock in rkand!
 
         // Seed product 4
         inventoryRepository.save(Inventory.builder().product(product4).warehouse(warehouse1).quantity(800).minThreshold(50).build());
@@ -219,7 +219,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         // 8. Seed CRM Customers
         Customer customer1 = customerRepository.save(Customer.builder()
-                .companyName("Zara Wholesale Uzbekistan")
+                .companyName("Nike Wholesale Uzbekistan")
                 .contactName("Sherzod Alimov")
                 .email("sherzod@zarawholesale.uz")
                 .phone("+998 90 900 11 22")
@@ -230,12 +230,12 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build());
 
         Customer customer2 = customerRepository.save(Customer.builder()
-                .companyName("Samarkand Fashion LLC")
+                .companyName("Xorazm Fashion LLC")
                 .contactName("Madina Karimova")
                 .email("madina@samfashion.uz")
                 .phone("+998 66 233 44 55")
                 .address("Registan Street 12")
-                .city("Samarkand")
+                .city("rkand")
                 .country("Uzbekistan")
                 .status("ACTIVE")
                 .build());
