@@ -198,13 +198,23 @@
         </div>
     </header>
 
+    <th:block th:fragment="layout-js">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('-translate-x-full');
+            }
+        </script>
+    </th:block>
+    <!--    </script>-->
     <!-- Side Menu Toggle JS -->
-    <script th:fragment="layout-js">
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        }
-    </script>
+    <!--    <script th:fragment="layout-js">-->
+    <!--        function toggleSidebar() {-->
+    <!--            const sidebar = document.getElementById('sidebar');-->
+    <!--            sidebar.classList.toggle('-translate-x-full');-->
+    <!--        }-->
 
 </body>
 </html>
