@@ -21,7 +21,7 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("Professional corporate-grade REST API documentation for wholesale clothing management. Includes authentication, product management, CRM, WMS, and ERP controls.")
                         .contact(new Contact()
-                                .name("ERP remodul Support")
+                                .name("ERP Admin Support")
                                 .email("support@company.com")))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
